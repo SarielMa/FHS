@@ -127,6 +127,10 @@ splits and the taxonomy index, which are released separately; and the code for t
 studies — retriever robustness, efficiency, the verifier-quality and bridge analyses, the beta
 sweep, and the query-form probe — none of which Table 1 or Table 2 depends on.
 
+**Data and taxonomy:** https://huggingface.co/datasets/lm2445/Financial_Tagging_FHS — the test
+and development splits and the 17,388-concept US-GAAP 2024 retrieval index that every reported
+number is measured against.
+
 ## Requirements
 
 Python 3.11+, `vllm`, `torch`, `transformers`, `rank_bm25`, `numpy`, `pyyaml`. Generation and

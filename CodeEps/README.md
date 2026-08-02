@@ -20,6 +20,9 @@ included.
 
 ## Data Layout
 
+The prepared data, retrieval index, and schema files are available at
+https://huggingface.co/datasets/lm2445/CodeEps_FHS/tree/main.
+
 Place the data artifact contents at the repository root before running the
 experiments:
 
