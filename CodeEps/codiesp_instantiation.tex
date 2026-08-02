@@ -1,0 +1,186 @@
+% =====================================================================
+% MAIN TEXT -- replaces the current second-domain subsection
+% =====================================================================
+
+\subsubsection{CodiEsp Diagnosis Coding}
+\label{sec:codiesp}
+
+We instantiate evidence-to-taxonomy retrieval on CodiEsp-D, the diagnosis
+portion of the CodiEsp clinical coding benchmark. The official CodiEsp test
+cases are the source contexts, and the candidate inventory contains
+\num{71344} local diagnosis-code labels after intersecting the CodiEsp valid
+diagnosis-code list with the billable FY2018 diagnosis-code inventory. A fact
+is $x_i=(X_i,\ell_i,v_i)$: English clinical context $X_i$, a relocated
+diagnosis mention $\ell_i$, and target diagnosis code $v_i$. CodiEsp's original
+offsets are Spanish offsets, so we first relocate each gold diagnosis mention
+into the English context and then study grounding and retrieval given that
+located mention; upstream extraction errors therefore do not propagate into any
+number we report.
+
+\paragraph{Dimensions and their match types.}
+We instantiate the schema of Section~\ref{sec:factorized} with $M{=}6$
+dimensions drawn from the diagnosis-code inventory and CodiEsp clinical
+evidence (Table~\ref{tab:codiesp_schema}). What matters downstream is not the
+dimension names but how each one can be checked against a candidate.
+\textsc{Family}, \textsc{Role}, \textsc{Qualifier}, \textsc{Scope}, and
+\textsc{Temporal} are matched exactly after normalization against controlled
+vocabularies of 21, 9, 21, 5, and 12 categories. \textsc{Event} has no
+controlled vocabulary and falls back to token overlap against the candidate's
+label and documentation text. These per-dimension match types, rather than the
+dimensions themselves, are what a new inventory has to supply.
+
+\paragraph{Category profiles.}
+The five vocabulary-matched dimensions give each code a \emph{category
+profile}: the tuple of its matched values. Two codes sharing a profile differ
+primarily in specific condition wording, whereas codes with different profiles
+can differ in chapter, code class, modifier, laterality, or encounter/extension
+status. This is what the verifier window of Section~\ref{sec:llmverifier} is
+filled by, so that the window spans competing clinical readings instead of only
+competing spellings.
+
+Appendix~\ref{app:codiesp} gives the split statistics, the context
+serialization, the index and its diagnosis-code pre-filter, the vocabularies,
+and the evaluation convention.
+
+\begin{table}[!htbp]
+\centering
+\scriptsize
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Dimension} & \textbf{Meaning} & \textbf{Example} & \textbf{Match} \\
+\midrule
+\textsc{Family} & broad clinical family & Respiratory diseases & vocab (21) \\
+\textsc{Role} & diagnosis-code class & Injury/poisoning & vocab (9) \\
+\textsc{Event} & specific condition or finding & Costal fracture & overlap \\
+\textsc{Qualifier} & modifier or severity & Acute, malignant, open & vocab (21) \\
+\textsc{Scope} & laterality & Left, bilateral & vocab (5) \\
+\textsc{Temporal} & encounter or extension status & Initial encounter & vocab (12) \\
+\bottomrule
+\end{tabular}
+\caption{The $M{=}6$ dimensions instantiated for CodiEsp diagnosis coding.
+\textbf{Match} is how the dimension is compared against a candidate; the five
+vocabulary-matched dimensions form the category profile.}
+\label{tab:codiesp_schema}
+\end{table}
+
+
+% =====================================================================
+% APPENDIX -- replaces/adds the second-domain task details
+% =====================================================================
+
+\section{Task Instantiation Details}
+\label{app:instantiation}
+
+\subsection{CodiEsp Diagnosis Coding}
+\label{app:codiesp}
+
+\paragraph{Splits and statistics.}
+The evaluation set is a deterministic exact-relocation slice of the official
+CodiEsp test split, not a new random split. We keep all 250 test clinical
+cases. From the diagnosis annotations, after inventory filtering,
+deduplication, and exact English mention relocation, the split contains
+\num{3144} target facts over \num{958} distinct gold codes
+(Table~\ref{tab:codiesp_data_stats}). The full prepared diagnosis set contained
+\num{3431} facts; \num{287} were dropped because they did not pass the exact
+English relocation criterion. No development split or CodiEsp-specific
+configuration selection is used.
+
+\begin{table}[!htbp]
+\centering
+\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Statistic} & \textbf{CodiEsp-D} \\
+\midrule
+Source documents & 250 \\
+Target facts & 3,144 \\
+Unique gold codes & 958 \\
+Facts per document & 12.58 \\
+3-character gold codes & 410 \\
+4--5-character gold codes & 2,547 \\
+6--7-character gold codes & 187 \\
+\bottomrule
+\end{tabular}
+\caption{CodiEsp diagnosis test statistics after exact English mention
+relocation.}
+\label{tab:codiesp_data_stats}
+\end{table}
+
+\paragraph{Locus and context serialization.}
+The locus $\ell_i$ carries the relocated English diagnosis mention and the
+local English clinical locus. Because CodiEsp offsets are offsets into Spanish
+clinical text, each gold mention is first re-located in the English
+machine-translated context with one model call and an exact-substring check.
+The retained split has \texttt{relocation\_parse\_ok\_rate}=1.0 and
+\texttt{relocation\_exact\_substring\_rate}=1.0; among retained facts,
+\num{904} relocations were found from an aligned-sentence candidate scope and
+\num{2240} from a document-level candidate scope before exact substring
+selection. The source context $X_i$ is serialized as clinical mention, code
+class \texttt{diagnosis}, input type, and English source context, with the
+runner's default \texttt{12000}-character context budget for query generation
+and reranking. Every method receives the same serialization, and direct
+retrieval uses it verbatim as its query, so this choice sets the floor as well
+as the input to grounding.
+
+\paragraph{Taxonomy filtering and index.}
+Of the local diagnosis-code labels available to the CodiEsp setup, we retain
+\num{71344} candidates after intersecting the CodiEsp valid diagnosis-code list
+with billable FY2018 diagnosis codes. Each code is one document holding its
+identifier, canonical English label, documentation text, and structural
+metadata. Since the inventory has no single official definition paragraph per
+code, the documentation string concatenates, in order, current-code inclusion
+terms, inherited include notes, hierarchy path text, and alphabetic-index
+lead/sub-term paths resolving to the code. Exclusion notes are kept separate
+and are not included in retrieval text. Retrieval is BM25 at depth $K{=}200$,
+implemented by the local runner with $k_1=1.5$ and $b=0.75$.
+
+\paragraph{Datatype pre-filter.}
+The analogue of the financial datatype pre-filter is the diagnosis-code
+inventory restriction. Every fact in this CodiEsp instantiation has code class
+\texttt{diagnosis}, and every retained candidate is a billable diagnosis code,
+so the shared type-filter hook restricts scoring to that diagnosis inventory.
+Where a gold code is not retained by the inventory construction, the fact is
+counted as a miss rather than excluded from a method-specific denominator. The
+filter is a property of the index and applies identically to every method
+compared, direct retrieval included.
+
+\paragraph{Label-coverage term.}
+Sparse scoring over compositional diagnosis labels can favor longer labels that
+repeat query terms without matching the intended code reading. The retriever
+therefore supports adding to the range-normalized BM25 score two token-coverage
+terms between the query and the candidate's canonical label, one normalized by
+the label's length and one by the query's, under a single weight
+$w_{\mathrm{cov}}$. In this CodiEsp matrix we run both
+$w_{\mathrm{cov}}=0.0$ and $w_{\mathrm{cov}}=1.0$ cells. Like the diagnosis
+pre-filter, the term is a property of the index rather than an FHS component
+and is enabled identically for every method within a cell.
+
+\paragraph{Vocabularies and the match operator.}
+The five controlled vocabularies were fixed before evaluation: 21
+\textsc{Family} categories, 9 \textsc{Role} classes, 21 \textsc{Qualifier}
+modifiers, 5 \textsc{Scope} laterality values, and 12 \textsc{Temporal}
+encounter/extension values. \textsc{Family} corresponds to broad chapter-level
+clinical families; \textsc{Role} distinguishes classes such as
+disease/disorder, neoplasm, injury/poisoning, external cause, and
+health-status factor; \textsc{Scope} contains right, left, bilateral,
+unspecified-side, and not-applicable; and \textsc{Temporal} contains encounter,
+sequela, healing, stage, fetus-specific, unspecified, and not-applicable
+categories. A normalization map takes the generator's free-form output onto the
+controlled values, and values that fail to normalize are logged. For the
+vocabulary-free \textsc{Event} dimension, a value matches a candidate when its
+tokens overlap the candidate's concatenated label and documentation text.
+
+\paragraph{Evaluation convention.}
+A prediction is correct when it matches the gold diagnosis-code identifier
+exactly after the runner's tag normalization. Each fact has exactly one gold
+code. Recall@10, Recall@50, Recall@200, and MRR are computed over the retrieved
+list at depth $K{=}200$ before the shared listwise selector. Accuracy is the
+top-1 output of the selector.
+
+\paragraph{Shared backbone and selector.}
+All grounding methods use \textsc{Qwen3-32B} as the generator and, where
+applicable, the verifier backbone. Downstream of every method with reranking
+enabled, a shared listwise selector using the same \textsc{Qwen3-32B} model
+receives that method's top-$K$ list and returns at most twenty ranked codes. It
+is not part of any method's contribution; the same selector prompt, candidate
+format, and evaluation code are held fixed across arms.

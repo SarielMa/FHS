@@ -1,0 +1,15 @@
+/.cache/
+/data/
+/index/
+/raw/
+/schema/
+/logs/
+/results/
+/runs_codiesp_grounding_baseline/
+/codiesp_hf_artifact/
+__pycache__/
+*.py[cod]
+*.log
+*.out
+*.err
+.ipynb_checkpoints/

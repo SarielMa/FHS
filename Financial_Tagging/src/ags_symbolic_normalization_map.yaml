@@ -1,0 +1,81 @@
+{
+  "version": "2026-07-23.1",
+  "description": "Controlled symbolic normalization terms shared by AGS component validation and reward diagnostic runners.",
+  "dimensions": {
+    "temporal": {
+      "instant": ["instant", "as of", "at date", "ending balance", "end of period", "period end"],
+      "duration": ["duration", "during", "for the period", "year ended", "three months ended", "six months ended", "nine months ended"],
+      "current": ["current", "within one year", "short term", "short-term"],
+      "noncurrent": ["noncurrent", "non-current", "long term", "long-term", "after one year"],
+      "prior": ["prior", "previous", "preceding", "last year"],
+      "future": ["future", "thereafter", "subsequent", "maturities"],
+      "year_1": ["year one", "first year", "in year one", "next year"],
+      "year_2": ["year two", "second year", "in year two"],
+      "year_3": ["year three", "third year", "in year three"],
+      "year_4": ["year four", "fourth year", "in year four"],
+      "year_5": ["year five", "fifth year", "in year five"]
+    },
+    "qualifier": {
+      "gross": ["gross", "before deductions"],
+      "net": ["net", "net of", "after deductions"],
+      "total": ["total", "aggregate", "summed", "combined"],
+      "component": ["component", "portion", "part", "line item"],
+      "current": ["current", "short term", "short-term"],
+      "noncurrent": ["noncurrent", "non-current", "long term", "long-term"],
+      "pretax": ["pretax", "pre tax", "pre-tax", "before tax", "before income tax"],
+      "aftertax": ["aftertax", "after tax", "after-tax", "net of tax"],
+      "weighted_average": ["weighted average", "weighted-average"],
+      "basic": ["basic"],
+      "diluted": ["diluted"],
+      "fair_value": ["fair value"],
+      "carrying_amount": ["carrying amount", "book value"],
+      "accumulated": ["accumulated", "cumulative"],
+      "accrued": ["accrued"],
+      "deferred": ["deferred"],
+      "allowance": ["allowance", "reserve"],
+      "impairment": ["impairment", "impaired"]
+    },
+    "aggregation": {
+      "total": ["total", "aggregate", "summed", "combined"],
+      "component": ["component", "portion", "part", "line item"],
+      "average": ["average", "weighted average", "weighted-average"],
+      "minimum": ["minimum", "min"],
+      "maximum": ["maximum", "max"],
+      "gross": ["gross"],
+      "net": ["net"]
+    },
+    "scope": {
+      "segment": ["segment", "reportable segment", "business segment"],
+      "geography": ["geography", "geographic", "country", "region", "domestic", "foreign"],
+      "class": ["class", "security class", "share class"],
+      "plan": ["plan", "benefit plan", "pension plan"],
+      "subsidiary": ["subsidiary", "affiliate"],
+      "consolidated": ["consolidated"],
+      "parent": ["parent"]
+    },
+    "family": {
+      "cash": ["cash", "cash equivalent"],
+      "debt": ["debt", "loan", "borrowing", "note payable", "principal"],
+      "equity": ["equity", "stock", "share", "common stock", "preferred stock"],
+      "revenue": ["revenue", "sales", "income"],
+      "expense": ["expense", "cost"],
+      "asset": ["asset"],
+      "liability": ["liability", "payable", "obligation"],
+      "tax": ["tax", "income tax"],
+      "lease": ["lease"],
+      "inventory": ["inventory"],
+      "receivable": ["receivable"],
+      "derivative": ["derivative", "hedge"],
+      "insurance": ["insurance"],
+      "investment": ["investment", "security"]
+    },
+    "role": {},
+    "event": {}
+  },
+  "metadata_aliases": {
+    "period_type": ["periodType", "period_type", "period type"],
+    "balance": ["balance"],
+    "unit": ["unit", "unitRef", "unit_ref"],
+    "datatype": ["type", "datatype", "entity_type"]
+  }
+}
